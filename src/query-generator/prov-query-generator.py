@@ -43,111 +43,107 @@ def sparql(path, query):
 
 
 
-
-def countProvoClasses (g):
-    sparqlquery = """
-        select (count (distinct ?o) as ?cnt)
-        where {?s a ?o .
-        filter (REGEX(STR(?o), "^http://www.w3.org/ns/prov#"))
-        }
-        """
-    data = sparql("/sparql/endpoint-lax/"+g, sparqlquery)
-    
-    for binding in data["results"]["bindings"]:
-    
-        print binding["cnt"]["value"]
-    return
-
-
-
-
-
-
-
-
-def countProvoInstances (g):
-    sparqlquery = """
-        select ?o (count(distinct ?s) as ?cnt)
-        where {?s a ?o .
-        filter (REGEX(STR(?o), "^http://www.w3.org/ns/prov#"))
-        }
-        group by ?o
-
-        """
-    data = sparql("/sparql/endpoint-lax/"+g, sparqlquery)
-    
-
-    
-    for binding in data["results"]["bindings"]:
-        
-        
-        if len(binding)>1:
-            print binding["o"]["value"] + "\t" + binding["cnt"]["value"]
-        else:
-            print "No PROV-O instances found"
-    return
-
-
-
-
-
-
-
-
-def countProvoStms (g):
-    sparqlquery = """
-        select ?p (count(*) as ?cnt)
-        where {?s ?p ?o .
-        filter (REGEX(STR(?p), "^http://www.w3.org/ns/prov#"))
-        }
-        group by ?p
-        """
-    data = sparql("/sparql/endpoint-lax/"+g, sparqlquery)
-    
-    for binding in data["results"]["bindings"]:
-        
-        print binding["p"]["value"] + "\t" + binding["cnt"]["value"]
-    return
-
-
-
-
-
-
-
-
-def countProvoProperties (g):
-    sparqlquery = """
-        select (count(distinct ?p) as ?cnt)
-        where {?s ?p ?o .
-        filter (REGEX(STR(?p), "^http://www.w3.org/ns/prov#"))
-        }
-        """
-    data = sparql("/sparql/endpoint-lax/"+g, sparqlquery)
-    
-    for binding in data["results"]["bindings"]:
-        
-        print binding["cnt"]["value"]
-    return
-
 ### produce a data summary for a PROV-O dataset
 ### Currently we use the ProLOD++ app for this: https://www.hpi.uni-potsdam.de/naumann/sites/prolod++/app.html
 ### For the moment, the profile results are hard-coded. We will work with ProvLOD++ team to revise this
 
 def prolod (g):
-    return
+    
+    profilename = '/Users/zhaoj/workspace/ProvQ/data/taverna-profile.csv'
+    
+    reader = csv.reader(open(profilename, "rU"), delimiter=',')
+
+    #skip the first row
+    reader.next()
+    
+    associations = {}
+    
+    for row in reader:
+        condition = row[0]
+        consequence = row[1]
+        confidence = row[3]
+        
+        if (confidence > 0.9):
+        
+            if (associations.has_key(condition)):
+                associatedProperties = associations.get(condition)
+                if (associatedProperties.count(consequence)==0):
+                    associatedProperties.append(consequence)
+            else:
+                associations[condition]= [consequence]
+
+    #print associations
+
+    return associations
 
 def queryGenerator (g):
     
     properties = ["prov:used", "prov:wasGeneratedBy", "prov:wasDerivedFrom", "prov:startedAtTime", "prov:endedAtTime", "prov:wasAssociatedWith", "prov:wasAttributedTo", "prov:wasInformedBy", "prov:actedOnBehalfOf"]
     
+    print "==== Query Generation For Starting Point Terms===="
+
+    
+    associations = prolod(g)
+    
     for p in properties:
-        sparqlquery = """
-            PREFIX prov: <http://www.w3.org/ns/prov#>
-            select distinct ?p
-            where {?s """ + p + """ ?o; ?p ?o}
-            """
-        print sparqlquery
+        
+        seedQuery = "No queries for the property: " + p
+        
+        if (associations.has_key(p)):
+            
+            seedQuery = "select distinct * where {?s " + p + " ?o; "
+        
+            associatedProperties = associations.get(p)
+            
+            count = 0
+        
+            for item in range(len(associatedProperties)-1):
+                
+                count = count + 1
+            
+                seedQuery = seedQuery + associatedProperties[item] + " ?o" + str(count) + "; "
+            
+            count = count + 1
+    
+            seedQuery = seedQuery + associatedProperties[len(associatedProperties)-1] + " ?o" + str(count) + ".} "
+
+        print seedQuery
+    
+    return
+
+
+def queryGeneratorQualified (g):
+    
+    properties = ["prov:entity", "prov:agent", "prov:activity", "prov:hadRole", "prov:hadPlan"]
+    
+    print "==== Query Generation For Qualified Terms===="
+
+    associations = prolod(g)
+    
+    for p in properties:
+        
+        seedQuery = "No queries for the property: " + p
+        
+        if (associations.has_key(p)):
+            
+            seedQuery = "select distinct * where {?s ?p [" + p + " ?o; "
+            
+            associatedProperties = associations.get(p)
+            
+            count = 0
+            
+            for item in range(len(associatedProperties)-1):
+                
+                count = count + 1
+                
+                seedQuery = seedQuery + associatedProperties[item] + " ?o" + str(count) + "; "
+            
+            count = count + 1
+            
+            seedQuery = seedQuery + associatedProperties[len(associatedProperties)-1] + " ?o" + str(count) + "] } "
+        
+        print seedQuery
+    
     return
 
 
@@ -158,7 +154,7 @@ def provq(filename):
                     
     queryGenerator(filename)
 
-#generateExQueries(filename)
+    queryGeneratorQualified(filename)
     
     return
 
