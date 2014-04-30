@@ -1,0 +1,17 @@
+==== Query Generation For: ta-provenance====
+==== Query Generation For Starting Point Terms====
+select distinct * where {?s prov:used ?o; wfprov:describedByProcess ?o1; wfprov:usedInput ?o2; wfprov:wasPartOfWorkflowRun ?o3; rdfs:label ?o4; prov:endedAtTime ?o5; prov:qualifiedAssociation ?o6; prov:startedAtTime ?o7; prov:qualifiedUsage ?o8.} 
+select distinct * where {?s prov:wasGeneratedBy ?o; wfprov:describedByParameter ?o1; wfprov:wasOutputFrom ?o2; prov:qualifiedGeneration ?o3.} 
+select distinct * where {?s prov:wasDerivedFrom ?o; taverna:errorMessage ?o1; taverna:stackTrace ?o2.} 
+select distinct * where {?s prov:startedAtTime ?o; wfprov:describedByProcess ?o1; wfprov:usedInput ?o2; wfprov:wasPartOfWorkflowRun ?o3; rdfs:label ?o4; prov:qualifiedAssociation ?o5; prov:qualifiedUsage ?o6; prov:endedAtTime ?o7; prov:used ?o8.} 
+select distinct * where {?s prov:endedAtTime ?o; wfprov:describedByProcess ?o1; wfprov:usedInput ?o2; wfprov:wasPartOfWorkflowRun ?o3; rdfs:label ?o4; prov:qualifiedAssociation ?o5; prov:qualifiedUsage ?o6; prov:startedAtTime ?o7; prov:used ?o8.} 
+No queries for the property: prov:wasAssociatedWith
+No queries for the property: prov:wasAttributedTo
+No queries for the property: prov:wasInformedBy
+No queries for the property: prov:actedOnBehalfOf
+==== Query Generation For Qualified Terms====
+select distinct * where {?s ?p [prov:entity ?o; rdf:type ?o1; prov:hadRole ?o2] } 
+select distinct * where {?s ?p [prov:agent ?o; prov:hadPlan ?o1] } 
+select distinct * where {?s ?p [prov:activity ?o; prov:hadRole ?o1] } 
+select distinct * where {?s ?p [prov:hadRole ?o; rdf:type ?o1] } 
+select distinct * where {?s ?p [prov:hadPlan ?o; prov:agent ?o1] } 
