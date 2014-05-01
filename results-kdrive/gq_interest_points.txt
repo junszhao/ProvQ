@@ -1,0 +1,112 @@
+﻿#*****************************************************************
+#<Query 1>Interesting Point: prov:activity
+#Matched Query Type: Topic Query 
+#The topic: prov:Generation
+#Number of results: 9102
+#*****************************************************************
+SELECT ?Generation ?x4_1 ?x3_1 ?x0_1  
+ WHERE {
+#types
+?Generation rdf:type <http://www.w3.org/ns/prov#Generation>.
+
+#attributes
+
+#relations
+?Generation <http://www.w3.org/ns/prov#activity> ?x4_1 .
+?Generation <http://www.w3.org/ns/prov#hadRole> ?x3_1 .
+
+#reverse relations
+ ?x0_1 <http://www.w3.org/ns/prov#qualifiedGeneration> ?Generation .
+
+}
+
+
+#*****************************************************************
+#<Query 2>Interesting Point: prov:agent
+#Matched Query Type: Topic Query 
+#The topic: prov:Association
+#Number of results: 7635
+#*****************************************************************
+SELECT ?Association ?x5_1 ?x6_1 ?x7_1  
+ WHERE {
+#types
+?Association rdf:type <http://www.w3.org/ns/prov#Association>.
+
+#attributes
+
+#relations
+?Association <http://www.w3.org/ns/prov#hadPlan> ?x5_1 .
+?Association <http://www.w3.org/ns/prov#agent> ?x6_1 .
+
+#reverse relations
+ ?x7_1 <http://www.w3.org/ns/prov#qualifiedAssociation> ?Association .
+
+}
+
+#*****************************************************************
+#<Query 3>Interesting Point: prov:entity
+#Matched Query Type: Topic Query 
+#The topic: prov:Usage
+#Number of results: 14979
+#*****************************************************************
+SELECT ?Usage ?x2_1 ?x3_1 ?x4_1  
+ WHERE {
+#types
+?Usage rdf:type <http://www.w3.org/ns/prov#Usage>.
+
+#attributes
+
+#relations
+?Usage <http://www.w3.org/ns/prov#entity> ?x2_1 .
+?Usage <http://www.w3.org/ns/prov#hadRole> ?x3_1 .
+
+#reverse relations
+ ?x4_1 <http://www.w3.org/ns/prov#qualifiedUsage> ?Usage .
+
+}
+
+#*****************************************************************
+#<Query 4>Interesting Point: prov:hadRole 
+# !!!!Same as Query 3!!!
+#Matched Query Type: Topic Query 
+#The topic: prov:Usage
+#Number of results: 14979
+#*****************************************************************
+SELECT ?Usage ?x2_1 ?x3_1 ?x4_1  
+ WHERE {
+#types
+?Usage rdf:type <http://www.w3.org/ns/prov#Usage>.
+
+#attributes
+
+#relations
+?Usage <http://www.w3.org/ns/prov#entity> ?x2_1 .
+?Usage <http://www.w3.org/ns/prov#hadRole> ?x3_1 .
+
+#reverse relations
+ ?x4_1 <http://www.w3.org/ns/prov#qualifiedUsage> ?Usage .
+
+}
+
+#*****************************************************************
+#<Query 5>Interesting Point: prov:hadPlan
+# !!!!Same as Query 2!!!
+#Matched Query Type: Topic Query 
+#The topic: prov:Association
+#Number of results: 7635
+#*****************************************************************
+SELECT ?Association ?x5_1 ?x6_1 ?x7_1  
+ WHERE {
+#types
+?Association rdf:type <http://www.w3.org/ns/prov#Association>.
+
+#attributes
+
+#relations
+?Association <http://www.w3.org/ns/prov#hadPlan> ?x5_1 .
+?Association <http://www.w3.org/ns/prov#agent> ?x6_1 .
+
+#reverse relations
+ ?x7_1 <http://www.w3.org/ns/prov#qualifiedAssociation> ?Association .
+
+}

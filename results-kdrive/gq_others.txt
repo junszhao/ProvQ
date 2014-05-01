@@ -1,0 +1,95 @@
+﻿#*****************************************
+#Other Top Queries
+#*****************************************
+
+#
+# Q1: Owl:Thing (#instance:52049)
+#
+SELECT ?type ?sha1 ?sha512 ?x0_1  
+ WHERE {
+#types
+
+#attributes
+?type <http://ns.taverna.org.uk/2012/tavernaprov/sha1> ?sha1 .
+?type <http://ns.taverna.org.uk/2012/tavernaprov/sha512> ?sha512 .
+
+#relations
+
+#reverse relations
+ ?x0_1 <http://ns.taverna.org.uk/2012/tavernaprov/content> ?type .
+
+}
+
+#
+# Q2: Owl:Thing (#instance:40746)
+#
+SELECT ?type ?x1_1 ?Collection  
+ WHERE {
+#types
+?Collection rdf:type <http://www.w3.org/ns/prov#Collection>.
+
+#attributes
+
+#relations
+?type <http://ns.taverna.org.uk/2012/tavernaprov/content> ?x1_1 .
+
+#reverse relations
+ ?Collection <http://www.w3.org/ns/prov#hadMember> ?type .
+
+}
+
+#
+# Q6: Owl:Thing (#instance:4488)
+#
+SELECT ?type ?label ?startedAtTime ?endedAtTime ?Usage ?Association ?x8_1 ?x9_1 ?x9_2 ?WorkflowRun ?x0_1 ?x0_2 ?Generation  
+ WHERE {
+#types
+?Usage rdf:type <http://www.w3.org/ns/prov#Usage>.
+?Association rdf:type <http://www.w3.org/ns/prov#Association>.
+?WorkflowRun rdf:type <http://purl.org/wf4ever/wfprov#WorkflowRun>.
+?Generation rdf:type <http://www.w3.org/ns/prov#Generation>.
+?WorkflowRun rdf:type <http://purl.org/wf4ever/wfprov#WorkflowRun>.
+
+#attributes
+?type <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+?type <http://www.w3.org/ns/prov#startedAtTime> ?startedAtTime .
+?type <http://www.w3.org/ns/prov#endedAtTime> ?endedAtTime .
+
+#relations
+?type <http://www.w3.org/ns/prov#qualifiedUsage> ?Usage .
+?type <http://www.w3.org/ns/prov#qualifiedAssociation> ?Association .
+?type <http://purl.org/wf4ever/wfprov#describedByProcess> ?x8_1 .
+?type <http://purl.org/wf4ever/wfprov#usedInput> ?x9_1 .
+?type <http://www.w3.org/ns/prov#used> ?x9_2 .
+?type <http://purl.org/wf4ever/wfprov#wasPartOfWorkflowRun> ?WorkflowRun .
+
+#reverse relations
+ ?x0_1 <http://www.w3.org/ns/prov#wasGeneratedBy> ?type .
+ ?x0_2 <http://purl.org/wf4ever/wfprov#wasOutputFrom> ?type .
+ ?Generation <http://www.w3.org/ns/prov#activity> ?type .
+ ?WorkflowRun <http://purl.org/dc/terms/hasPart> ?type .
+
+}
+
+#
+# Q10: Collection (#instance:3280)
+#
+SELECT ?Collection ?x0_1 ?x4_1 ?x4_2 ?x1_1 ?Generation ?x3_1  
+ WHERE {
+#types
+?Collection rdf:type <http://www.w3.org/ns/prov#Collection>.
+?Generation rdf:type <http://www.w3.org/ns/prov#Generation>.
+
+#attributes
+
+#relations
+?Collection <http://www.w3.org/ns/prov#hadMember> ?x0_1 .
+?Collection <http://www.w3.org/ns/prov#wasGeneratedBy> ?x4_1 .
+?Collection <http://purl.org/wf4ever/wfprov#wasOutputFrom> ?x4_2 .
+?Collection <http://ns.taverna.org.uk/2012/tavernaprov/content> ?x1_1 .
+?Collection <http://www.w3.org/ns/prov#qualifiedGeneration> ?Generation .
+?Collection <http://purl.org/wf4ever/wfprov#describedByParameter> ?x3_1 .
+
+#reverse relations
+
+}
