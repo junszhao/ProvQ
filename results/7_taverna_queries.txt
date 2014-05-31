@@ -1,0 +1,30 @@
+Here, only distinct queries were kept. Redundant queries were removed.
+
+== Query 1 ==
+select distinct * where {?s prov:used ?o; wfprov:describedByProcess ?o1; wfprov:usedInput ?o2; wfprov:wasPartOfWorkflowRun ?o3; rdfs:label ?o4; prov:endedAtTime ?o5; prov:qualifiedAssociation ?o6; prov:startedAtTime ?o7; prov:qualifiedUsage ?o8.} 
+
+
+== Query 2 ==
+
+select distinct * where {?s prov:wasGeneratedBy ?o; wfprov:describedByParameter ?o1; wfprov:wasOutputFrom ?o2; prov:qualifiedGeneration ?o3.} 
+
+== Query 3 ==
+
+select distinct * where {?s prov:wasDerivedFrom ?o; taverna:errorMessage ?o1; taverna:stackTrace ?o2.} 
+
+== Query 4 ==
+
+select distinct * where {?s ?p [prov:entity ?o; rdf:type ?o1; prov:hadRole ?o2] } 
+
+== Query 5 ==
+
+select distinct * where {?s ?p [prov:agent ?o; prov:hadPlan ?o1] } 
+
+== Query 6 ==
+
+select distinct * where {?s ?p [prov:activity ?o; prov:hadRole ?o1] } 
+
+== Query 7 ==
+
+select distinct * where {?s ?p [prov:hadRole ?o; rdf:type ?o1] } 
+
