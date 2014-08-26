@@ -14,7 +14,8 @@ import time
 import StringIO
 import codecs
 import csv
-
+from rdflib import URIRef
+import cluster as cluster
 
 try:
     # Running Python 2.5 with simplejson?
@@ -22,128 +23,80 @@ try:
 except ImportError:
     import json
 
-def sparql(path, query):
-    params = urllib.urlencode({"query": query})
-    headers = {
-        "Content-type": "application/x-www-form-urlencoded",
-        "Accept": "application/sparql-results+json"}
-    conn = httplib.HTTPConnection("www.open-biomed.org.uk")
-    conn.request('POST', path, params, headers)
-    res = conn.getresponse()
-    if (res.status != 200):
-        print res.status
-        print res.reason
-        print res.read()
-        conn.close()
-        return None
-    else:
-        resultSet = json.load(res)
-        conn.close()
-        return resultSet
 
-
-
-### produce a data summary for a PROV-O dataset
-### Currently we use the ProLOD++ app for this: https://www.hpi.uni-potsdam.de/naumann/sites/prolod++/app.html
-### For the moment, the profile results are hard-coded. We will work with ProvLOD++ team to revise this
-
-def prolod (g):
-    
-    profilename = '/Users/zhaoj/workspace/ProvQ/data/taverna-profile.csv'
-    
-    reader = csv.reader(open(profilename, "rU"), delimiter=',')
-
-    #skip the first row
-    reader.next()
-    
-    associations = {}
-    
-    for row in reader:
-        condition = row[0]
-        consequence = row[1]
-        confidence = row[3]
+def profiling (filename):
+    analysis = cluster.AssociationMiner(filename)
         
-        if (confidence > 0.9):
-        
-            if (associations.has_key(condition)):
-                associatedProperties = associations.get(condition)
-                if (associatedProperties.count(consequence)==0):
-                    associatedProperties.append(consequence)
-            else:
-                associations[condition]= [consequence]
-
-    #print associations
+    analysis.analyse()
+    
+    associations = analysis.associations
 
     return associations
 
-def queryGenerator (g):
+
+def queryGenerator (associations):
     
-    properties = ["prov:used", "prov:wasGeneratedBy", "prov:wasDerivedFrom", "prov:startedAtTime", "prov:endedAtTime", "prov:wasAssociatedWith", "prov:wasAttributedTo", "prov:wasInformedBy", "prov:actedOnBehalfOf"]
+    properties = ["http://www.w3.org/ns/prov#used", "http://www.w3.org/ns/prov#wasGeneratedBy", "http://www.w3.org/ns/prov#wasDerivedFrom", "http://www.w3.org/ns/prov#startedAtTime", "http://www.w3.org/ns/prov#endedAtTime", "http://www.w3.org/ns/prov#wasAssociatedWith", "http://www.w3.org/ns/prov#wasAttributedTo", "http://www.w3.org/ns/prov#wasInformedBy", "http://www.w3.org/ns/prov#actedOnBehalfOf"]
     
     print "==== Query Generation For Starting Point Terms===="
-
-    
-    associations = prolod(g)
     
     for p in properties:
         
         seedQuery = "No queries for the property: " + p
         
-        if (associations.has_key(p)):
-            
-            seedQuery = "select distinct * where {?s " + p + " ?o; "
+        p = URIRef(p)
         
-            associatedProperties = associations.get(p)
+        if (p in associations):
             
+            seedQuery = "select distinct * where {?s <" + p + "> ?o;\n "
+        
+            associatedProperties = associations[p]
+    
             count = 0
         
-            for item in range(len(associatedProperties)-1):
-                
+            for key in associatedProperties:
                 count = count + 1
-            
-                seedQuery = seedQuery + associatedProperties[item] + " ?o" + str(count) + "; "
-            
-            count = count + 1
-    
-            seedQuery = seedQuery + associatedProperties[len(associatedProperties)-1] + " ?o" + str(count) + ".} "
+                
+                if (count < len(associatedProperties)):
+                    seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + ";\n "
+                else:
+                    seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + ".} "
 
         print seedQuery
-    
+
     return
 
 
-def queryGeneratorQualified (g):
+def queryGeneratorQualified (associations):
     
-    properties = ["prov:entity", "prov:agent", "prov:activity", "prov:hadRole", "prov:hadPlan"]
+    properties = ["http://www.w3.org/ns/prov#entity", "http://www.w3.org/ns/prov#agent", "http://www.w3.org/ns/prov#activity", "http://www.w3.org/ns/prov#hadRole", "http://www.w3.org/ns/prov#hadPlan"]
     
     print "==== Query Generation For Qualified Terms===="
 
-    associations = prolod(g)
-    
     for p in properties:
         
         seedQuery = "No queries for the property: " + p
         
-        if (associations.has_key(p)):
+        p = URIRef(p)
+        
+        if (p in associations):
             
-            seedQuery = "select distinct * where {?s ?p [" + p + " ?o; "
+            seedQuery = "select distinct * where {?s ?p [<" + p + "> ?o;\n "
             
-            associatedProperties = associations.get(p)
+            associatedProperties = associations[p]
             
             count = 0
             
-            for item in range(len(associatedProperties)-1):
-                
+            for key in associatedProperties:
                 count = count + 1
                 
-                seedQuery = seedQuery + associatedProperties[item] + " ?o" + str(count) + "; "
-            
-            count = count + 1
-            
-            seedQuery = seedQuery + associatedProperties[len(associatedProperties)-1] + " ?o" + str(count) + "] } "
-        
-        print seedQuery
+                if (count < len(associatedProperties)):
+                    seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + ";\n "
+                else:
+                    seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + "] } "
     
+        print seedQuery
+
     return
 
 
@@ -151,24 +104,19 @@ def queryGeneratorQualified (g):
 def provq(filename):
     
     print "==== Query Generation For: " + filename + "===="
-                    
-    queryGenerator(filename)
-
-    queryGeneratorQualified(filename)
     
+    associations = profiling(filename)
+                    
+    queryGenerator(associations)
+
+    queryGeneratorQualified(associations)
+
     return
 
 
-def main():
-                    
-    #endpointpath = ["ta-provenance", "csiro", "obiama"]
+def main(argv):
     
-    endpointpath = ["ta-provenance"]
-                    
-    endpointhost = "http://www.open-biomed.org.uk/sparql/endpoint-lax/"
-    
-    for arg in endpointpath:
-        provq(arg)
+    provq(argv)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])
