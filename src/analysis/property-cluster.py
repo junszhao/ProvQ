@@ -1,6 +1,6 @@
-"""property-associatin.py: compute property associations by the number of unique subjects that associate them
+"""property-cluster.py: compute property associations by the number of unique subjects that associate them
     
-    Usage: property-association.py
+    Usage: property-cluster.py prov-o-data.nt
     """
 
 import os, os.path
@@ -113,12 +113,10 @@ def analyse(filename):
 
     return
 
-def main():
-    
-    filename = '/Users/zhaoj/workspace/ProvQ/data/ta-201402.nt'
-    #filename = '/Users/zhaoj/workspace/ProvQ/data/test-ta-prov.nt'
-
-    analyse(filename)
+def main(argv):
+    # /Users/zhaoj/workspace/ProvQ/data/ta-201402.nt
+    #/Users/zhaoj/workspace/ProvQ/data/test-ta-prov.nt
+    analyse(argv)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])

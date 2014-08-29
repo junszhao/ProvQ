@@ -1,6 +1,6 @@
-"""property-associatin.py: compute unique property associations
+"""unique-property-association.py: compute properties that share the same (sub,obj)
     
-    Usage: property-association.py
+    Usage: unique-property-association.py prov-o-data.nt
     """
 
 import os, os.path
@@ -79,11 +79,10 @@ def analyse(filename):
 
     return
 
-def main():
-    
-    filename = '/Users/zhaoj/workspace/ProvQ/data/ta-201402.nt'
-
-    analyse(filename)
+def main(argv):
+    # /Users/zhaoj/workspace/ProvQ/data/ta-201402.nt
+    #/Users/zhaoj/workspace/ProvQ/data/test-ta-prov.nt
+    analyse(argv)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])
