@@ -14,7 +14,7 @@ import time
 import StringIO
 import codecs
 import csv
-from rdflib import URIRef
+from rdflib import URIRef, Graph
 import cluster as cluster
 
 try:
@@ -40,6 +40,8 @@ def queryGenerator (associations):
     
     print "==== Query Generation For Starting Point Terms===="
     
+    queries = []
+    
     for p in properties:
         
         seedQuery = "No queries for the property: " + p
@@ -48,7 +50,7 @@ def queryGenerator (associations):
         
         if (p in associations):
             
-            seedQuery = "select distinct * where {?s <" + p + "> ?o;\n "
+            seedQuery = "select distinct ?s where {?s <" + p + "> ?o;\n "
         
             associatedProperties = associations[p]
     
@@ -63,8 +65,10 @@ def queryGenerator (associations):
                     seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + ".} "
 
         print seedQuery
+        
+        queries.append(seedQuery)
 
-    return
+    return queries
 
 
 def queryGeneratorQualified (associations):
@@ -72,6 +76,8 @@ def queryGeneratorQualified (associations):
     properties = ["http://www.w3.org/ns/prov#entity", "http://www.w3.org/ns/prov#agent", "http://www.w3.org/ns/prov#activity", "http://www.w3.org/ns/prov#hadRole", "http://www.w3.org/ns/prov#hadPlan"]
     
     print "==== Query Generation For Qualified Terms===="
+    
+    queries = []
 
     for p in properties:
         
@@ -81,7 +87,7 @@ def queryGeneratorQualified (associations):
         
         if (p in associations):
             
-            seedQuery = "select distinct * where {?s ?p [<" + p + "> ?o;\n "
+            seedQuery = "select distinct ?s where {?s ?p [<" + p + "> ?o;\n "
             
             associatedProperties = associations[p]
             
@@ -96,10 +102,29 @@ def queryGeneratorQualified (associations):
                     seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + "] } "
     
         print seedQuery
+        
+        queries.append(seedQuery)
 
+    return queries
+
+def testcoverage(queries,filename):
+    g = Graph()
+    g.parse(filename, format="nt")    
+    subjects = set()
+    
+    for q in queries:
+        print "Query: " + q
+        results = g.query(q)       
+        for row in results:
+            subject = row['s']
+            if subject not in subjects:
+                subjects.add(subject)
+                
+    total = g.subjects()
+    
+    coverage = len(subjects)/len(total)
+    
     return
-
-
 
 def provq(filename):
     
@@ -107,9 +132,11 @@ def provq(filename):
     
     associations = profiling(filename)
                     
-    queryGenerator(associations)
+    queries = queryGenerator(associations)
 
     queryGeneratorQualified(associations)
+    
+    testcoverage(queries,filename)
 
     return
 
