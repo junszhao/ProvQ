@@ -50,7 +50,7 @@ def queryGenerator (associations):
         
         if (p in associations):
             
-            seedQuery = "select distinct ?s where {?s <" + p + "> ?o;\n "
+            seedQuery = "select distinct ?s where {?s <" + p + "> ?o.\n "
         
             associatedProperties = associations[p]
     
@@ -60,13 +60,14 @@ def queryGenerator (associations):
                 count = count + 1
                 
                 if (count < len(associatedProperties)):
-                    seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + ";\n "
+                    seedQuery = seedQuery + "optional {?s\t<"+key + "> ?o" + str(count) + ".}\n "
                 else:
-                    seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + ".} "
-
+                    seedQuery = seedQuery + "optional {?s\t<"+key + "> ?o" + str(count) + ".} }"
+            queries.append(seedQuery)
+        
         print seedQuery
         
-        queries.append(seedQuery)
+        
 
     return queries
 
@@ -87,7 +88,7 @@ def queryGeneratorQualified (associations):
         
         if (p in associations):
             
-            seedQuery = "select distinct ?s where {?s ?p [<" + p + "> ?o;\n "
+            seedQuery = "select distinct ?s where {?s1 ?p ?s . ?s <" + p + "> ?o.\n "
             
             associatedProperties = associations[p]
             
@@ -97,19 +98,32 @@ def queryGeneratorQualified (associations):
                 count = count + 1
                 
                 if (count < len(associatedProperties)):
-                    seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + ";\n "
+                    seedQuery = seedQuery + "optional {?s <"+key + "> ?o" + str(count) + ".}\n "
                 else:
-                    seedQuery = seedQuery + "\t<"+key + "> ?o" + str(count) + "] } "
+                    seedQuery = seedQuery + "optional {?s <"+key + "> ?o" + str(count) + ".} } "
+            queries.append(seedQuery)
     
         print seedQuery
         
-        queries.append(seedQuery)
+        
 
     return queries
 
 def testcoverage(queries,filename):
     g = Graph()
-    g.parse(filename, format="nt")    
+    g.parse(filename, format="nt")   
+    querystring = "select distinct ?s where {?s ?p ?o}" 
+    allSubj = g.query(querystring)
+    unique = set()
+    total = 0
+    
+    for row in allSubj:
+        s = row['s']
+        if s not in unique:
+            total = total +1
+    
+    print total
+    
     subjects = set()
     
     for q in queries:
@@ -118,11 +132,40 @@ def testcoverage(queries,filename):
         for row in results:
             subject = row['s']
             if subject not in subjects:
-                subjects.add(subject)
-                
-    total = g.subjects()
+                subjects.add(subject)                
     
-    coverage = len(subjects)/len(total)
+    coverage = len(subjects)/float(total)
+    print len(subjects)
+    print coverage
+    
+    return
+
+def testStms(queries,filename):
+    g = Graph()
+    g.parse(filename, format="nt")    
+    allSubj = g.triples()
+    unique = set()
+    total = 0
+    
+    for s in allSubj:
+        if s not in unique:
+            total = total +1
+    
+    print total
+    
+    stms = set()
+    
+    for q in queries:
+        print "Query: " + q
+        results = g.query(q)       
+        for row in results:
+            stm = row[0]
+            if stm not in stms:
+                stms.add(stm)                
+    
+    coverage = len(stms)/float(total)
+    print len(stms)
+    print coverage
     
     return
 
@@ -132,11 +175,14 @@ def provq(filename):
     
     associations = profiling(filename)
                     
-    queries = queryGenerator(associations)
+    queries1 = queryGenerator(associations)
 
-    queryGeneratorQualified(associations)
+    queries2 = queryGeneratorQualified(associations)
+    
+    queries = queries1 + queries2
     
     testcoverage(queries,filename)
+    #testStms(queries,filename)
 
     return
 
